@@ -29,11 +29,11 @@ def  listar_produtos():
     #percorrer 
     for chave, valor in produtos_ordenados:
         #acessando valores
-        nome_p = valor["nome"]
+        nome_p = valor["nome"].strip().lower()
         qtd = valor["detalhes"]["quantidade"]
         preco = valor["detalhes"]["valor"]
         msg_p = f"Produto: {nome_p} - Quantidade disponível: {qtd} - Preço: R$ {preco}"
-        msg.append(msg_p)
+        msg.append(msg_p)  
     return msg
     
 #REMOVER PRODUTOS
@@ -41,9 +41,10 @@ def remover_produto():
     produto_removido = input("Remover produto: ").strip().lower()
     for chave, valor in produtos.items():
         chave_produto = chave
-    if produto_removido == valor["nome"]:
-        #apaga pelo id do produto
-        del produtos[chave_produto]
+        if produto_removido == valor["nome"].strip().lower():
+            #apaga pelo id do produto
+            del produtos[chave_produto]
+            return "Produto removido com sucesso!"
     else:
         return "[ERROR] Produto não encontrado!"
     
@@ -52,20 +53,18 @@ def remover_produto():
 def atualizar_quantidade():
     #pede nome do produto e quantidade a ser atualizada
     nome_p = input("Nome do produto: ").strip().lower()
-    qtd_p = input("Nova quantidade: ")
+    qtd_p = int(input("Nova quantidade: "))
     #pecorremos o dict produtos, obtendo a chave e o valor
     for chave, valor in produtos.items():
         #se o nome informado já existir no dict 
-        nome_prod_atual = valor["nome"]
+        nome_prod_atual = valor["nome"].strip().lower()
         if nome_p == nome_prod_atual:
         #qtd atualizada
             valor["detalhes"]["quantidade"] = qtd_p
-            break
+            return "Quantidade atualizada com sucesso!"      
     else:
         return "[ERROR] Produto não encontrado"
                 
-        
-
 #MENU 
 def exibir_menu():
     return """
@@ -86,8 +85,11 @@ def main():
             adicionar_produtos()
         elif opcao == "2":
             resultado = listar_produtos()
-            for item in resultado:
-                print(item)  
+            if not resultado:
+                print("Estoque vazio")
+            else:
+                for item in resultado:
+                    print(item)  
         elif opcao == "3":
             print(remover_produto())
         elif opcao == "4":
