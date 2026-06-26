@@ -23,5 +23,5 @@ Os exercícios e projetos estão organizados em subpastas, geralmente com um nom
 |---|---|
 | [📦 Estoque de produtos](https://github.com/RaykaDev/Python-Projects/tree/main/inventory-manager) | CRUD de estoque em terminal utilizando Python e dicionários aninhados |
 | [✅ Gerenciador de tarefas](https://github.com/RaykaDev/Python-Projects/tree/main/task-manager) | Sistema de gerenciamento de tarefas em terminal com operações CRUD e controle de status|
-
+| [📚 Gerenciador de livros](https://github.com/RaykaDev/Python-Projects/tree/main/library-manager) | Sistema de gerenciamento de biblioteca em terminal com operações CRUD e controle de quantidade de exemplares e empréstimos|
 
