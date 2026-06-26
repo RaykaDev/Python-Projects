@@ -19,7 +19,7 @@ Neste sistema, os livros são armazenados em um dicionário utilizando o título
 
 ## 📁 Estrutura de Arquivos
 O projeto está organizado da seguinte forma:
-- `gerenciadorBiblioteca.py`: Script principal contendo toda a lógica do sistema.
+- `biblioteca.py`: Script principal contendo toda a lógica do sistema.
 
 <br>
 
@@ -52,4 +52,4 @@ py gerenciadorBiblioteca.py
 - Estruturação de menus em terminal
 - Tratamento de erros com `try/except` e `raise`
 - Validação de entradas do usuário
-- Controle de estoque com operações aritméticas em dicionários
+
