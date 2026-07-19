@@ -1,4 +1,4 @@
-# Python - Exercícios
+# Python - Projetos/Exercícios
 
 Este repositório é dedicado a armazenar uma coleção de projetos e exercícios desenvolvidos em Python, refletindo meu processo de aprendizado e evolução na linguagem.
 
