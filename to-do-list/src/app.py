@@ -15,13 +15,13 @@ class Task(BaseModel):
 
 # raiz da API
 @app.get("/")
-async def home():
+def home():
     return {"TO-DO-LIST": "Organize suas  tarefas"}
 
 
 # ADICIONA NOVA TAREFA
 @app.post("/nova_tarefa")
-async def nova_tarefa(
+def nova_tarefa(
     # utiliza a class task como modelo esperado
     dado_tarefa: Task,
 ):
@@ -37,7 +37,7 @@ async def nova_tarefa(
 
 # LISTAR TODAS AS TAREFAS
 @app.get("/lista_tarefas")
-async def lista_tarefas():
+def lista_tarefas():
 
     if not task_dates:
         raise HTTPException(status_code=404, detail="Não há nenhuma tarefa cadastrada")
@@ -47,7 +47,7 @@ async def lista_tarefas():
 
 # MARCAR TAREFA COMO CONCLUIDA
 @app.put("/concluir_tarefa")
-async def concluir_tarefa(tarefa_id: int | None = None, nome_tarefa: str | None = None):
+def concluir_tarefa(tarefa_id: int | None = None, nome_tarefa: str | None = None):
     if tarefa_id is None and nome_tarefa is None:
         raise HTTPException(
             status_code=422, detail="Informe o id ou o nome da tarefa para atualizar."
@@ -73,7 +73,7 @@ async def concluir_tarefa(tarefa_id: int | None = None, nome_tarefa: str | None 
 
 # EXCLUIR TAREFA
 @app.delete("/deletar_tarefa")
-async def deletar_tarefa(tarefa_id: int | None = None, nome_tarefa: str | None = None):
+def deletar_tarefa(tarefa_id: int | None = None, nome_tarefa: str | None = None):
     if tarefa_id is None and nome_tarefa is None:
         raise HTTPException(
             status_code=422, detail="Informe o id ou o nome da tarefa para deletar."
