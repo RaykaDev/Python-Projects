@@ -46,16 +46,16 @@ https://github.com/RaykaDev/Python-Projects.git
 Python-Projects/todo-list-api
 ```
 
-3. **Instale as dependências:**
+3. **Instale as dependências com Poetry:**
 
 ```bash
-pip install fastapi uvicorn
+poetry install
 ```
 
 4. **Execute o servidor:**
 
 ```bash
-fastapi dev app.py
+poetry run fastapi dev src/app.py
 ```
 
 5. **Acesse a documentação interativa (Swagger UI):**
