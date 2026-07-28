@@ -6,16 +6,16 @@ Este é um projeto desenvolvido para treinar lógica de programação, criação
 
 ## ✨ Sobre o Projeto
 
-Neste sistema, as tarefas são armazenadas em um dicionário utilizando o **id** da tarefa como chave e um objeto `Task` (modelo Pydantic) como valor, contendo nome, descrição e status de conclusão. <br> O usuário pode interagir com o sistema através dos endpoints da API, testados via Swagger UI (`/docs`), Insomnia ou Postman.
+Neste sistema, as tarefas são armazenadas em uma lista, onde cada item é um objeto `Tarefa` (modelo Pydantic), contendo id opcional, nome, descrição e status de conclusão. <br> O usuário pode interagir com o sistema através dos endpoints da API, testados via Swagger UI (`/docs`), Insomnia ou Postman.
 
 **O sistema também:**
 
-- adiciona novas tarefas com nome e descrição, gerando o id automaticamente
+- adiciona novas tarefas com nome e descrição, validando que o nome não seja vazio e que não haja duplicidade
 - lista todas as tarefas cadastradas, com nome, descrição e status de conclusão
-- marca uma tarefa como concluída, buscando por id ou por nome
-- remove uma tarefa existente, buscando por id ou por nome
+- marca uma tarefa como concluída, buscando pelo nome
+- remove uma tarefa existente, buscando pelo nome
 - valida os dados de entrada com Pydantic (`BaseModel`)
-- trata erros com `HTTPException`, retornando status codes apropriados (404, 422, etc.)
+- trata erros com `HTTPException`, retornando status codes apropriados (400, 404, 422, etc.)
   <br>
 
 ## 📁 Estrutura de Arquivos
@@ -68,13 +68,13 @@ http://127.0.0.1:8000/docs
 
 ## 📌 Endpoints
 
-| Método   | Rota               | Descrição                                        |
-| -------- | ------------------ | ------------------------------------------------ |
-| `GET`    | `/`                | Rota raiz de boas-vindas                         |
-| `POST`   | `/nova_tarefa`     | Adiciona uma nova tarefa                         |
-| `GET`    | `/lista_tarefas`   | Lista todas as tarefas cadastradas               |
-| `PUT`    | `/concluir_tarefa` | Marca uma tarefa como concluída (por id ou nome) |
-| `DELETE` | `/deletar_tarefa`  | Remove uma tarefa (por id ou nome)               |
+| Método   | Rota               | Descrição                                  |
+| -------- | ------------------ | ------------------------------------------ |
+| `GET`    | `/`                | Rota raiz de boas-vindas                   |
+| `POST`   | `/nova_tarefa`     | Adiciona uma nova tarefa                   |
+| `GET`    | `/lista_tarefas`   | Lista todas as tarefas cadastradas         |
+| `PUT`    | `/concluir_tarefa` | Marca uma tarefa como concluída (por nome) |
+| `DELETE` | `/deletar_tarefa`  | Remove uma tarefa (por nome)               |
 
 <br>
 
@@ -82,8 +82,8 @@ http://127.0.0.1:8000/docs
 
 - Criação de APIs REST com FastAPI
 - Validação de dados com Pydantic (`BaseModel`)
-- Manipulação de dicionários como estrutura de "banco de dados" em memória
-- Uso de path params e query params, e suas diferenças de obrigatoriedade
+- Manipulação de listas como estrutura de "banco de dados" em memória
+- Uso de query params opcionais e suas validações
 - Tratamento de erros com `HTTPException`
 - Diferença entre `is None` e comparação de valores
 - Testes de API com Swagger UI e Insomnia
