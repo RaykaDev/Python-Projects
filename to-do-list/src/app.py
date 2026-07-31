@@ -2,16 +2,36 @@ from fastapi import FastAPI, HTTPException, Depends
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 import secrets
 from pydantic import BaseModel
+from sqlalchemy import create_engine, Column, Integer, String, Boolean
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, Session
 
-app = FastAPI()
+DATABASE_URL = "sqlite:///./tarefas.db"
+engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
 
-lista_tarefas: list["Tarefa"] = []
+app = FastAPI(
+    title="Lista de Tarefas",
+    description="API para gerenciar tarefas",
+    version="1.0.0",
+    contact={"name": "Rayka"},
+)
+
 
 security = HTTPBasic()
 
-# para teste
+# para fins de testes, não utilizei variáveis de ambiente
 my_user = "user"
 my_password = "user"
+
+
+class tarefaDB(Base):
+    __tablename__ = "Tarefas"
+    id = Column(Integer, primary_key=True, index=True)
+    nome = Column(String, index=True)
+    descricao = Column(String, index=True)
+    concluida = Column(Boolean, default=False)
 
 
 class Tarefa(BaseModel):
@@ -19,6 +39,20 @@ class Tarefa(BaseModel):
     nome: str
     descricao: str
     concluida: bool = False
+
+    class Config:
+        from_attributes = True
+
+
+Base.metadata.create_all(bind=engine)
+
+
+def sessao_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
 def autenticar_usuario(credentials: HTTPBasicCredentials = Depends(security)):
@@ -40,27 +74,42 @@ def home():
 
 
 # ADICIONA NOVA TAREFA
-@app.post("/nova_tarefa")
+
+
+@app.post("/nova_tarefa", response_model=Tarefa)
 def nova_tarefa(
     # utiliza a class Tarefa como modelo esperado
     dado_tarefa: Tarefa,
+    db: Session = Depends(sessao_db),
     credentials: HTTPBasicCredentials = Depends(autenticar_usuario),
 ):
-    if not dado_tarefa.nome.strip():
-        raise HTTPException(status_code=422, detail="Nome não pode ser vazio.")
+    # tarefa existe?
+    db_tarefa = db.query(tarefaDB).filter(tarefaDB.nome == dado_tarefa.nome).first()
 
-    # verifica se há tarefa duplicadas
-    for tarefa in lista_tarefas:
-        if tarefa.nome.lower() == dado_tarefa.nome.lower():
-            raise HTTPException(status_code=400, detail="Esta tarefa já existe")
+    # se existe
+    if db_tarefa:
+        raise HTTPException(status_code=400, detail="Esta tarefa já existe no sistema")
 
-    lista_tarefas.append(dado_tarefa)
-    return {"mensagem": "Tarefa adicionada com sucesso", "Tarefa:": dado_tarefa}
+    # cria objeto tarefa
+    nova_tarefa = tarefaDB(
+        nome=dado_tarefa.nome,
+        descricao=dado_tarefa.descricao,
+        concluida=dado_tarefa.concluida,
+    )
+    # persistir dados tarefa
+    db.add(nova_tarefa)
+    db.commit()
+    db.refresh(nova_tarefa)
+
+    return nova_tarefa
 
 
 # LISTAR TODAS AS TAREFAS
+
+
 @app.get("/lista_tarefas")
 def listar_tarefas(
+    db: Session = Depends(sessao_db),
     credentials: HTTPBasicCredentials = Depends(autenticar_usuario),
     ordenar_por: str | None = None,
     page: int = 1,
@@ -71,62 +120,77 @@ def listar_tarefas(
             status_code=400, detail="Page e Size devem ser maiores que zero"
         )
 
-    if not lista_tarefas:
-        raise HTTPException(status_code=404, detail="Não há nenhuma tarefa cadastrada")
-
-    if ordenar_por is not None and ordenar_por != "nome":
-        raise HTTPException(status_code=422, detail="Só é possível ordenar por 'nome' ")
-
-    if ordenar_por == "nome":
-        tarefas_ordenadas = sorted(
-            lista_tarefas, key=lambda tarefa: tarefa.nome.lower()
-        )
-    else:
-        tarefas_ordenadas = lista_tarefas
-
-    # paginação
     start = (page - 1) * size
-    end = start + size
-    tarefas_paginadas = tarefas_ordenadas[start:end]
 
-    if not tarefas_paginadas:
-        raise HTTPException(status_code=404, detail="Página não encontrada")
+    tarefas_query = db.query(tarefaDB)
 
-    return {"Lista de tarefas": tarefas_paginadas}
+    # ordenar tarefas por nome e concluida
+    if ordenar_por == "nome":
+        tarefas_query = tarefas_query.order_by(tarefaDB.nome)
+    elif ordenar_por == "concluida":
+        tarefas_query = tarefas_query.order_by(tarefaDB.concluida)
+
+    total_tarefas = tarefas_query.count()
+    tarefas = tarefas_query.offset(start).limit(size).all()
+
+    if not tarefas:
+        raise HTTPException(status_code=404, detail="Nenhuma tarefa encontrada")
+
+    return {
+        "page": page,
+        "size": size,
+        "total_registros": total_tarefas,
+        "tarefas": [
+            {"nome": t.nome, "descrição": t.descricao, "concluída": t.concluida}
+            for t in tarefas
+        ],
+    }
 
 
 # MARCAR TAREFA COMO CONCLUIDA
-@app.put("/concluir_tarefa")
+
+
+@app.put("/concluir_tarefa", response_model=Tarefa)
 def concluir_tarefa(
     nome_tarefa: str | None = None,
+    db: Session = Depends(sessao_db),
     credentials: HTTPBasicCredentials = Depends(autenticar_usuario),
 ):
     if nome_tarefa is None:
         raise HTTPException(
             status_code=422, detail="Informe o nome da tarefa para atualizar"
         )
-    for tarefa in lista_tarefas:
-        if tarefa.nome.lower() == nome_tarefa.lower():
-            tarefa.concluida = True
-            return {"mensagem": "Tarefa concluida", "Tarefa": tarefa}
-    raise HTTPException(status_code=404, detail="Esta tarefa não existe.")
+    db_tarefa = db.query(tarefaDB).filter(tarefaDB.nome == nome_tarefa).first()
+
+    if not db_tarefa:
+        raise HTTPException(status_code=404, detail="Essa tarefa não existe no sistema")
+
+    db_tarefa.concluida = True
+    db.commit()
+    db.refresh(db_tarefa)
+
+    return db_tarefa
 
 
 # EXCLUIR TAREFA
-@app.delete("/deletar_tarefa")
+
+
+@app.delete("/deletar_tarefa", response_model=Tarefa)
 def deletar_tarefa(
     nome_tarefa: str | None = None,
+    db: Session = Depends(sessao_db),
     credentials: HTTPBasicCredentials = Depends(autenticar_usuario),
 ):
     if nome_tarefa is None:
         raise HTTPException(
             status_code=422, detail="Informe o nome da tarefa para deletar"
         )
-    for i, tarefa in enumerate(lista_tarefas):
-        if tarefa.nome.lower() == nome_tarefa.lower():
-            tarefa_deletada = lista_tarefas.pop(i)
-            return {
-                "mensagem": "Tarefa deletada com sucesso",
-                "Tarefa deletada:": tarefa_deletada,
-            }
-    raise HTTPException(status_code=404, detail="Esta tarefa não existe.")
+    db_tarefa = db.query(tarefaDB).filter(tarefaDB.nome == nome_tarefa).first()
+
+    if not db_tarefa:
+        raise HTTPException(status_code=404, detail="Esta tarefa não existe no sistema")
+
+    db.delete(db_tarefa)
+    db.commit()
+
+    return db_tarefa
