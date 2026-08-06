@@ -88,6 +88,7 @@ docker-compose down
 > Se estiver usando Podman: `podman-compose down`
  
 <br>
+
 ## 🔐 Autenticação
  
 Todos os endpoints de tarefas exigem autenticação básica (usuário e senha). As credenciais são carregadas via variáveis de ambiente (`.env`) e, **por se tratar de um projeto de estudo e testes, estão expostas abaixo apenas para facilitar a reprodução do exercício** — em um projeto real, as credenciais não estariam publicadas na documentação: 
@@ -108,6 +109,7 @@ No Swagger UI, clique no botão **Authorize** (canto superior direito) e informe
 | `DELETE` | `/deletar_tarefa`  | Remove uma tarefa do banco de dados (por nome)                    |
  
 <br>
+
 ## 📌 Parâmetros de Listagem (`/lista_tarefas`)
  
 | Parâmetro     | Tipo   | Padrão | Descrição                                             |
@@ -117,6 +119,7 @@ No Swagger UI, clique no botão **Authorize** (canto superior direito) e informe
 | `ordenar_por` | string | `None` | Campo de ordenação (aceita `"nome"` ou `"concluida"`) |
  
 <br>
+
 ## 📌 Aprendizados
  
 - Criação de APIs REST com FastAPI
