@@ -5,8 +5,9 @@ from pydantic import BaseModel
 from sqlalchemy import create_engine, Column, Integer, String, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
+import os
 
-DATABASE_URL = "sqlite:///./tarefas.db"
+DATABASE_URL = os.getenv("DATABASE_URL")
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
@@ -21,9 +22,8 @@ app = FastAPI(
 
 security = HTTPBasic()
 
-# para fins de testes, não utilizei variáveis de ambiente
-my_user = "user"
-my_password = "user"
+my_user = os.getenv("my_user")
+my_password = os.getenv("my_password")
 
 
 class tarefaDB(Base):
