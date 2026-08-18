@@ -44,7 +44,26 @@ O projeto está organizado da seguinte forma:
 [![Poetry](https://img.shields.io/badge/Poetry-60A5FA?style=for-the-badge&logo=poetry&logoColor=white)](https://python-poetry.org/)
 [![Podman](https://img.shields.io/badge/Podman-892CA0?style=for-the-badge&logo=podman&logoColor=white)](https://podman.io/)
 <br>
- 
+
+## 🧪 Ambiente Kafka — `feature/kafka-docker`
+
+> **Nota:** Esta seção está relacionada à branch `feature/kafka-docker`.
+
+Nesta branch, foi adicionado um ambiente local com Apache Kafka, ZooKeeper e Kafka UI utilizando Compose, como parte de um exercício prático de configuração e orquestração de serviços.
+
+O Kafka foi configurado exclusivamente para fins de estudo. Nesta etapa, ele não está integrado à lógica da aplicação e não possui implementação de Producer ou Consumer.
+
+### Serviços adicionados
+
+- ZooKeeper
+- Apache Kafka
+- Kafka UI
+
+A interface do Kafka UI está disponível em:
+
+`http://localhost:8080`
+<br>
+
 ## ▶️ Como Rodar o Projeto
  
 Este projeto foi containerizado, então basta ter o **Docker** (ou **Podman**, usado no desenvolvimento) e o **Docker Compose** (ou `podman-compose`) instalados na sua máquina. Não é necessário instalar Python, Poetry ou nenhuma dependência manualmente — tudo é resolvido dentro do container.
